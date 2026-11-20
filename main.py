@@ -162,7 +162,7 @@ def build_poster():
          "First three-way APEC talks end in a joint peace "
          "declaration; Ukraine and Iran discussed."),
         (NAVY, "THE GULF  ·  WAR",
-         "Iran hits US bases in Kuwait and Bahrain",
+         "Iran hits US bases in Kuwait and Bahrain after US strikes",
          "Tehran fires drones at Ali al-Salem after US jets bombed "
          "Qeshm Island; Houthi missiles hit Riyadh."),
     ]
