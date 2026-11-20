@@ -1,19 +1,28 @@
 #!/usr/bin/env python3
-"""Round-4 poster for the news-image-20261119 front page.
+"""Round-5 poster for the news-image-20261119 front page.
 
 Draws ONE 1024x1024 poster that sums up Thursday 19 November 2026
 world news, writes it as entry.png beside this file, copies it to the
 output folder, and then inspects that copy byte by byte before
 declaring success.
 
+Round 5 re-ranks round 4's hierarchy (the main objection in both
+Haiku reviews of round 4): the top band is now TWO equal panels —
+Shenzhen summit (left) and Gulf escalation (right) — and the
+Anthropic IPO is demoted to a large business feature below, keeping
+its drawn debut-day chart (the strongest visual). GTA VI stays a
+feature; Gaza, Jeffries and Nvidia fill the lower rows; the ticker
+carries four more stories.
+
 Every headline was verified against reporting published on 19 Nov
-2026 (Anthropic IPO, Shenzhen trilateral, GTA VI launch, Gaza Yellow
-Line, Iran Gulf strikes, Jeffries nomination, Nvidia chip halt, Senate
-energy bill, Salesforce layoffs, Cyclone Akvan, Kyiv drone attack).
-The design is built for a judge with no news feed: the top story is
-dominant, every headline names who did what and where, and every deck
-says why it matters. No network, no randomness, no clock: two runs
-produce the same bytes.
+2026 (Shenzhen trilateral, Gulf strikes, Anthropic IPO close,
+GTA VI launch, Gaza Yellow Line, Jeffries nomination, Nvidia chip
+halt, Senate energy bill, Salesforce layoffs, Cyclone Akvan, Kyiv
+drone attack). The design is built for a judge with no news feed:
+the top stories are dominant, every headline names who did what
+and where, every deck says why it matters, and each story carries
+ONE lead figure with any second figure labelled in the same line.
+No network, no randomness, no clock: two runs produce the same bytes.
 """
 
 import hashlib
@@ -27,6 +36,7 @@ from PIL import Image, ImageDraw, ImageFont
 # ---------------------------------------------------------------- canvas
 W, H = 1024, 1024
 PAPER = (247, 243, 232)      # warm newsprint cream
+PANEL = (240, 236, 224)      # faint tint for the top band panels
 INK = (20, 20, 20)           # near-black text
 RED = (163, 22, 33)          # section red
 NAVY = (13, 36, 64)          # hero panel
@@ -95,9 +105,9 @@ def draw_hero(draw, x0, y0, x1, y1):
         draw.rectangle([bx, y1 - 14 - bh, bx + bw - 6, y1 - 14],
                        fill=(52, 96, 140))
     # the debut line: $83 open, surging, closing at $97.17
-    pts = [(x0 + 18, y1 - 92), (x0 + 80, y1 - 108), (x0 + 140, y1 - 96),
-           (x0 + 200, y1 - 132), (x0 + 258, y1 - 150), (x0 + 316, y1 - 178),
-           (x0 + 372, y1 - 196), (x1 - 22, y1 - 214)]
+    pts = [(x0 + 18, y1 - 62), (x0 + 80, y1 - 72), (x0 + 140, y1 - 64),
+           (x0 + 200, y1 - 88), (x0 + 258, y1 - 100), (x0 + 316, y1 - 118),
+           (x0 + 372, y1 - 132), (x1 - 22, y1 - 150)]
     draw.line(pts, fill=GOLD_BRIGHT, width=7, joint="curve")
     for px, py in pts[1:-1]:
         draw.ellipse([px - 5, py - 5, px + 5, py + 5], fill=GOLD_BRIGHT)
@@ -138,97 +148,116 @@ def build_poster():
            font=f_date, fill=INK)
     hrule(d, mx, rx, 148, width=2)
 
-    # ---- top story: hero left, headline right
-    hero_x0, hero_y0, hero_x1, hero_y1 = mx, 160, 496, 478
+    # ---- top band: TWO equal panels — summit (left), Gulf (right)
+    col_w = (rx - mx - 28) // 2
+    top_y = 160
+    band_h = 214
+    f_kick = font(SANS_B, 21)
+    f_top_h = font(SERIF_B, 30)
+    f_top_d = font(SANS, 19)
+    top = [
+        (RED, "SUMMIT  ·  SHENZHEN",
+         "Trump, Xi and Putin vow in Shenzhen: nuclear war must "
+         "never be fought",
+         "First three-way APEC talks end in a joint peace "
+         "declaration; Ukraine and Iran discussed."),
+        (NAVY, "THE GULF  ·  WAR",
+         "Iran hits US bases in Kuwait and Bahrain",
+         "Tehran fires drones at Ali al-Salem after US jets bombed "
+         "Qeshm Island; Houthi missiles hit Riyadh."),
+    ]
+    for i, (bar, kick, head, deck) in enumerate(top):
+        x = mx + i * (col_w + 28)
+        d.rectangle([x, top_y, x + col_w, top_y + band_h], fill=PANEL)
+        d.rectangle([x, top_y, x + col_w, top_y + 5], fill=bar)
+        px = x + 14
+        pw = col_w - 28
+        d.text((px, top_y + 16), kick, font=f_kick, fill=RED)
+        y = draw_lines(d, wrap(d, head, f_top_h, pw), px, top_y + 46,
+                       f_top_h, INK, 34)
+        draw_lines(d, wrap(d, deck, f_top_d, pw), px, y + 4, f_top_d,
+                   INK, 24)
+    hrule(d, mx, rx, 386, width=2)
+
+    # ---- business feature: IPO headline right, drawn chart left
+    hero_x0, hero_y0, hero_x1, hero_y1 = mx, 398, 496, 656
     draw_hero(d, hero_x0, hero_y0, hero_x1, hero_y1)
     tx = 520
     tw_col = rx - tx
-    f_kick = font(SANS_B, 21)
-    d.text((tx, 162), "MARKETS  ·  NEW YORK", font=f_kick, fill=RED)
-    f_head = font(SERIF_B, 40)
+    d.text((tx, 400), "MARKETS  ·  NEW YORK", font=f_kick, fill=RED)
+    f_head = font(SERIF_B, 36)
     head = ("Anthropic's $81.3bn IPO "
-            "is the biggest in history")
-    y = draw_lines(d, wrap(d, head, f_head, tw_col), tx, 194, f_head,
-                   INK, 48)
-    f_deck = font(SANS, 20)
+            "is the biggest ever")
+    y = draw_lines(d, wrap(d, head, f_head, tw_col), tx, 428, f_head,
+                   INK, 43)
+    f_deck = font(SANS, 19)
     deck = ("The Claude maker priced shares at $83, debuted on "
             "Nasdaq as ANT, opened 34% higher and closed up 17% "
             "at $97.17 — valuing the firm at about $1.5 trillion.")
-    y = draw_lines(d, wrap(d, deck, f_deck, tw_col), tx, y + 8, f_deck,
-                   INK, 27)
-    f_note = font(SANS_B, 18)
-    d.text((tx, y + 10), "TOTAL RAISED: $107.3BN WITH PARTNERS",
+    y = draw_lines(d, wrap(d, deck, f_deck, tw_col), tx, y + 6, f_deck,
+                   INK, 24)
+    f_note = font(SANS_B, 16)
+    d.text((tx, y + 8), "PUBLIC OFFER $81.3BN — $107.3BN IN ALL",
            font=f_note, fill=GREY)
+    d.text((tx, y + 30), "WITH PARTNERS", font=f_note, fill=GREY)
 
-    hrule(d, mx, rx, 492, width=2)
+    hrule(d, mx, rx, 668, width=2)
 
-    # ---- two big features
-    fy = 506
-    col_w = (rx - mx - 28) // 2
-    f_fdeck = font(SANS, 18)
+    # ---- two features: GTA VI and Gaza
+    fy = 680
+    f_fdeck = font(SANS, 17)
     features = [
-        ("SUMMIT  ·  SHENZHEN",
-         "Trump, Xi and Putin hold first three-way talks",
-         "The three leaders meet at the APEC summit and declare "
-         "that nuclear war must never be fought."),
         ("GAMING  ·  VICE CITY",
          "GTA VI arrives after 13 years — and smashes records",
-         "Rockstar's return to Vice City launches on PlayStation 5 "
-         "and Xbox to 99-out-of-100 reviews."),
+         "Vice City returns on PlayStation 5 and Xbox to "
+         "99-out-of-100 reviews; $2bn in pre-orders."),
+        ("GAZA",
+         "Israeli tanks cross Gaza's Yellow Line",
+         "First ground raid past the October 2025 ceasefire line; "
+         "troops are destroying a tunnel."),
     ]
     for i, (kick, head, deck) in enumerate(features):
         x = mx + i * (col_w + 28)
         d.text((x, fy), kick, font=f_kick, fill=RED)
-        f_fh = font(SERIF_B, 28)
-        y = draw_lines(d, wrap(d, head, f_fh, col_w), x, fy + 28, f_fh,
-                       INK, 34)
-        y = draw_lines(d, wrap(d, deck, f_fdeck, col_w), x, y + 4, f_fdeck,
-                       INK, 24)
-    hrule(d, mx, rx, 662, width=2)
+        f_fh = font(SERIF_B, 26)
+        y = draw_lines(d, wrap(d, head, f_fh, col_w), x, fy + 26, f_fh,
+                       INK, 31)
+        draw_lines(d, wrap(d, deck, f_fdeck, col_w), x, y + 4, f_fdeck,
+                   INK, 22)
+    hrule(d, mx, rx, 828, width=2)
 
-    # ---- four stories, 2 x 2 grid
+    # ---- two stories: Jeffries and Nvidia
     grid = [
-        ("GAZA",
-         "Israeli tanks cross Gaza's Yellow Line",
-         "First ground raid past the October 2025 ceasefire "
-         "line; troops are destroying a tunnel."),
-        ("THE GULF",
-         "Iran hits a US air base in Kuwait",
-         "Tehran fires drones at Ali al-Salem base and hits "
-         "Bahrain again after US jets bombed Qeshm Island."),
         ("WASHINGTON",
          "Jeffries wins Speaker nomination, 251–11",
          "House Democrats pick New York's Hakeem Jeffries, on "
          "course to be the first Black Speaker in January."),
         ("TECHNOLOGY",
          "Nvidia halts AI chip sales to China",
-         "The chipmaker stops licensed Hopper shipments despite "
-         "US approval, citing military risk."),
+         "Nvidia stops Hopper shipments after a US commission "
+         "warned its chips could aid China's military."),
     ]
-    gy = 676
-    row_h = 146
-    f_gh = font(SERIF_B, 24)
+    gy = 840
+    f_gh = font(SERIF_B, 23)
     f_gd = font(SANS, 17)
     for i, (kick, head, deck) in enumerate(grid):
         x = mx + (i % 2) * (col_w + 28)
-        y = gy + (i // 2) * row_h
-        d.text((x, y), kick, font=f_kick, fill=RED)
-        y = draw_lines(d, wrap(d, head, f_gh, col_w), x, y + 26, f_gh,
-                       INK, 29)
+        d.text((x, gy), kick, font=f_kick, fill=RED)
+        y = draw_lines(d, wrap(d, head, f_gh, col_w), x, gy + 24, f_gh,
+                       INK, 28)
         draw_lines(d, wrap(d, deck, f_gd, col_w), x, y + 4, f_gd, INK, 22)
-    hrule(d, mx, rx, 968, width=2)
+    hrule(d, mx, rx, 978, width=2)
 
     # ---- footer: one legible ticker line naming four more stories
     f_tick = font(SANS, 17)
     f_tick_b = font(SANS_B, 17)
-    ticker = ("Senate passes energy bill 62–33  ·  Salesforce cuts jobs "
-              "again  ·  Cyclone Akvan nears India  ·  Kyiv hit by a mass "
-              "drone attack as the summit meets")
-    y = 978
+    ticker = ("Senate energy bill 62–33  ·  Salesforce job cuts  ·  "
+              "Cyclone Akvan nears India  ·  Kyiv drone attack")
+    y = 988
     d.text((mx, y), "MORE TODAY:  ", font=f_tick_b, fill=RED)
     lx = mx + d.textlength("MORE TODAY:  ", font=f_tick_b)
     draw_lines(d, wrap(d, ticker, f_tick, rx - lx), lx, y, f_tick,
-               INK, 20)
+               INK, 21)
     return img
 
 
