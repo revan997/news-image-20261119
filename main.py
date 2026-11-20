@@ -146,7 +146,7 @@ def build_poster():
     f_kick = font(SANS_B, 21)
     d.text((tx, 162), "MARKETS  ·  NEW YORK", font=f_kick, fill=RED)
     f_head = font(SERIF_B, 40)
-    head = ("Anthropic's $81bn IPO "
+    head = ("Anthropic's $81.3bn IPO "
             "is the biggest in history")
     y = draw_lines(d, wrap(d, head, f_head, tw_col), tx, 194, f_head,
                    INK, 48)
